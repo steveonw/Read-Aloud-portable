@@ -1,0 +1,67 @@
+name: Build Read Aloud USB
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "cmd/**"
+      - "web/**"
+      - "scripts/**"
+      - "packaging/**"
+      - ".github/workflows/build-usb.yml"
+      - "go.mod"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+
+    steps:
+      - name: Check out project
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.23.x"
+          cache: false
+
+      - name: Set up Emscripten
+        uses: mymindstorm/setup-emsdk@v14
+        with:
+          version: "4.0.23"
+          actions-cache-folder: emsdk-cache
+
+      - name: Install host tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y bzip2 cmake ninja-build zip
+
+      - name: Show tool versions
+        run: |
+          go version
+          emcc --version
+          cmake --version
+
+      - name: Build USB bundle
+        env:
+          SHERPA_TAG: v1.13.4
+          READALOUD_VERSION: 0.1.0
+        run: ./scripts/build_all.sh
+
+      - name: Inspect output
+        run: |
+          find dist/ReadAloudUSB -maxdepth 4 -type f -printf '%s %p\n' | sort -n
+          sha256sum dist/ReadAloudUSB.zip
+
+      - name: Upload completed USB ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: ReadAloudUSB
+          path: dist/ReadAloudUSB.zip
+          if-no-files-found: error
+          compression-level: 0
