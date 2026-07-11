@@ -3,7 +3,8 @@ name: Build Read Aloud USB
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches:
+      - main
     paths:
       - "cmd/**"
       - "web/**"
@@ -46,6 +47,10 @@ jobs:
           go version
           emcc --version
           cmake --version
+
+      - name: Make shell scripts executable
+        run: |
+          find scripts packaging -type f -name "*.sh" -exec chmod +x {} +
 
       - name: Build USB bundle
         env:
