@@ -47,10 +47,14 @@ jobs:
           emcc --version
           cmake --version
 
+      - name: Make shell scripts executable
+        run: |
+          find scripts packaging -type f -name "*.sh" -exec chmod +x {} +
+
       - name: Build USB bundle
         env:
           SHERPA_TAG: v1.13.4
-          READALOUD_VERSION: 0.1.0
+          READALOUD_VERSION: 0.3.0-amy-cache-fix
         run: ./scripts/build_all.sh
 
       - name: Inspect output
