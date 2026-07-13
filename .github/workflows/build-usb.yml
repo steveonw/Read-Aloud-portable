@@ -3,7 +3,8 @@ name: Build Read Aloud USB
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches:
+      - main
     paths:
       - "cmd/**"
       - "web/**"
